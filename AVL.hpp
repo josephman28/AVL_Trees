@@ -1,6 +1,7 @@
 #ifndef __AVLNode__
 #define __AVLNode__
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -24,7 +25,8 @@ private:
   AVLNode* maximum(AVLNode *t);
   AVLNode* predecessor(AVLNode* t);
   AVLNode* successor(AVLNode* t);
-  size_t height(AVLNode *t);
+  size_t max_height(AVLNode *t);
+  size_t min_height(AVLNode *t);
 
 public:
   AVL();

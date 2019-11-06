@@ -63,8 +63,19 @@ typename AVL<datatype>::AVLNode * AVL<datatype>::successor(AVLNode *t){
 }
 
 template <typename datatype>
-size_t AVL<datatype>::height(AVLNode *t){
+size_t AVL<datatype>::max_height(AVLNode *t){
+  if (t == nullptr)
+    return 0;
+  else
+    return 1 + max(height(t->left),height(t->right));
+}
 
+template <typename datatype>
+size_t AVL<datatype>::min_height(AVLNode *t){
+  if (t == nullptr)
+    return 0;
+  else
+    return 1 + min(height(t->left),height(t->right));
 }
 
 template <typename datatype>
