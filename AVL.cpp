@@ -63,7 +63,7 @@ typename AVL<datatype>::AVLNode * AVL<datatype>::successor(AVLNode *t){
 }
 
 template <typename datatype>
-size_t AVL<datatype>::max_height(AVLNode *t){
+size_t AVL<datatype>::height(AVLNode *t){
   if (t == nullptr)
     return 0;
   else
@@ -121,7 +121,7 @@ void AVL<datatype>::insert(datatype x){
 }
 
 template <typename datatype>
-void AVL<datatype>::remove(AVLNode*&t, datatype x, AVLNode*parent){
+void AVL<datatype>::remove(AVLNode*&t, datatype x){
   if(findNode(t, x)!=nullptr){
     AVLNode* tx = findNode(t, x);
     if((tx->left==nullptr)&&(tx->right==nullptr)){
@@ -135,7 +135,9 @@ void AVL<datatype>::remove(AVLNode*&t, datatype x, AVLNode*parent){
       delete tx;
     }
     else if((tx->left!=nullptr)&&(tx->right!=nullptr)){
-      // falta si tiene dos hijos
+      AVLNode * temp = minimum(tx->right);
+      tx->key = temp->key;
+      remove(temp, temp->key);
     }
     else{
       if((tx->left!=nullptr)&&(tx->right==nullptr)){
@@ -164,7 +166,7 @@ void AVL<datatype>::remove(AVLNode*&t, datatype x, AVLNode*parent){
 
 template <typename datatype>
 void AVL<datatype>::remove(datatype y){
-  remove(root, y, nullptr);
+  remove(root, y);
   count --;
 }
 
@@ -211,22 +213,49 @@ bool AVL<datatype>::empty(){
 }
 
 template <typename datatype>
-void AVL<datatype>::display(AVLNode *t, int count){
-  if(t!=nullptr){
+void AVL<datatype>::display(AVLNode *t, int count, vector<string>& s) {
+  if(t != nullptr){
     count++;
-    display(t->left,count);
-    cout << "(" << count-1 << ")" << t->key << " ";
-    if(predecessor(t)==nullptr){
-      cout << "pre" << " NULL ";
+    display(t->left, count, s);
+    string num = to_string(t->key);
+    for(unsigned i = 0; i < s.size(); i++){
+      if(i == unsigned(count-1))
+s[i] += to_string(t->key);
+      else{
+for(unsigned j = 0; j < num.length(); j++)
+ s[i] += " ";
+      }
     }
-    else
-      cout << "pre" << predecessor(t)->key << " ";
-    display(t->right,count);
+    display(t->right, count, s);
   }
-
 }
 
 template <typename datatype>
-void AVL<datatype>::display(){
-  display(root,0);
+void AVL<datatype>::display() {
+  int h = height(root);
+  vector<string> s(h, "");
+  display(root, 0, s);
+  for(unsigned i = 0; i < s.size(); i++)
+    cout << s[i] << endl;
+}
+
+template <typename datatype>
+bool AVL<datatype>::balanced(AVLNode *t){
+  bool fun = false;
+
+  if(t!=nullptr){
+    if(unsigned(height(t->left)-height(t->right))<=1){
+      fun = true;
+      return balanced(t->left) && balanced(t->right);
+    }
+  }
+  else{
+    return true;
+  }
+  return fun;
+}
+
+template <typename datatype>
+bool AVL<datatype>::balanced(){
+  return balanced(root);
 }

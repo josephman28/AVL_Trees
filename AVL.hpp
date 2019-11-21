@@ -2,6 +2,8 @@
 #define __AVLNode__
 #include <iostream>
 #include <algorithm>
+#include <vector>
+#include <string>
 
 using namespace std;
 
@@ -14,19 +16,22 @@ private:
     AVLNode *right;
     AVLNode *parent;
   };
+
   AVLNode *root;
   size_t count;
-  void insert(AVLNode*&t, datatype x, AVLNode*parent=nullptr);
-  void remove(AVLNode*&t, datatype x, AVLNode*parent=nullptr);
+
+  void insert(AVLNode*&t, datatype x, AVLNode*parent);
+  void remove(AVLNode*&t, datatype x);
   void destroyRecursive(AVLNode *t);
-  void display(AVLNode *t, int count);
+  void display(AVLNode *t, int count, vector<string> &s);
   AVLNode* findNode(AVLNode *t, datatype k) const;
   AVLNode* minimum(AVLNode *t);
   AVLNode* maximum(AVLNode *t);
   AVLNode* predecessor(AVLNode* t);
   AVLNode* successor(AVLNode* t);
-  size_t max_height(AVLNode *t);
+  size_t height(AVLNode *t);
   size_t min_height(AVLNode *t);
+  bool balanced(AVLNode *t);
 
 public:
   AVL();
@@ -38,9 +43,10 @@ public:
   bool find(datatype k) const;
   datatype minimo();
   datatype maximo();
-  //void remove(datatype y);
+  bool balanced();
   size_t size();
   bool empty();
 };
+
 #include "AVL.cpp"
 #endif //__AVLNode__
