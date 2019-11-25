@@ -63,19 +63,11 @@ typename AVL<datatype>::AVLNode * AVL<datatype>::successor(AVLNode *t){
 }
 
 template <typename datatype>
-size_t AVL<datatype>::height(AVLNode *t){
+int AVL<datatype>::height(AVLNode *t){
   if (t == nullptr)
     return 0;
   else
     return 1 + max(height(t->left),height(t->right));
-}
-
-template <typename datatype>
-size_t AVL<datatype>::min_height(AVLNode *t){
-  if (t == nullptr)
-    return 0;
-  else
-    return 1 + min(height(t->left),height(t->right));
 }
 
 template <typename datatype>
@@ -107,8 +99,9 @@ void AVL<datatype>::insert(AVLNode* &t, datatype x, AVLNode* parent){
         insert(t->right, x, t);
       }
     }
-
   }
+
+  balance(t);
   if(t->parent == nullptr) cout << "Parent de " << t->key << " es: nullptr" << endl;
   else cout << "Parent de " << t->key << " es: " << t->parent -> key << endl;
 }
@@ -126,21 +119,37 @@ void AVL<datatype>::remove(AVLNode*&t, datatype x){
     AVLNode* tx = findNode(t, x);
     if((tx->left==nullptr)&&(tx->right==nullptr)){
 
-      if(size()>0){
+      if(!empty()){
         if(tx->parent->right == tx)
           tx->parent->right = nullptr;
         else
           tx->parent->left = nullptr;
       }
       delete tx;
+      tx = nullptr;
+
     }
     else if((tx->left!=nullptr)&&(tx->right!=nullptr)){
+
       AVLNode * temp = minimum(tx->right);
       tx->key = temp->key;
-      remove(temp, temp->key);
+      if(height(temp)<=1){
+
+        if(temp->parent->left==temp)
+          temp->parent->left = nullptr;
+        else
+          temp->parent->right = nullptr;
+        delete temp;
+        temp = nullptr;
+      }
+      else
+        remove(temp, temp->key);
+      count++;
     }
     else{
+
       if((tx->left!=nullptr)&&(tx->right==nullptr)){
+
         tx->left->parent = tx->parent;
         if(tx->parent!= nullptr){
           if(tx->parent->right == tx)
@@ -149,8 +158,10 @@ void AVL<datatype>::remove(AVLNode*&t, datatype x){
             tx->parent->left = tx->left;
         }
         delete tx;
+        tx= nullptr;
       }
       else{
+
         tx->right->parent = tx->parent;
         if(tx->parent!= nullptr){
           if(tx->parent->right == tx)
@@ -159,15 +170,24 @@ void AVL<datatype>::remove(AVLNode*&t, datatype x){
             tx->parent->left = tx->right;
         }
         delete tx;
+        tx = nullptr;
       }
     }
+
+  }
+
+  count--;
+  cout << "OMEEE " << t->key << endl;
+  balance(t);
+  if(t!=nullptr){
+    if(t->parent == nullptr) cout << "Parent de " << t->key << " es: nullptr" << endl;
+    else cout << "Parent de " << t->key << " es: " << t->parent -> key << endl;
   }
 }
 
 template <typename datatype>
 void AVL<datatype>::remove(datatype y){
   remove(root, y);
-  count --;
 }
 
 template <typename datatype>
@@ -240,22 +260,100 @@ void AVL<datatype>::display() {
 }
 
 template <typename datatype>
-bool AVL<datatype>::balanced(AVLNode *t){
-  bool fun = false;
+void AVL<datatype>::balance(AVLNode *  & t){
 
-  if(t!=nullptr){
-    if(unsigned(height(t->left)-height(t->right))<=1){
-      fun = true;
-      return balanced(t->left) && balanced(t->right);
+	if(t == nullptr){
+		return;
+  }
+
+	if(height(t -> left) - height(t -> right) > 1){
+
+    cout << "Tengo que balancear a " << t->key << endl;
+		if(height(t -> left -> left) >= height(t -> left ->right)){
+			left_rot(t);
     }
-  }
-  else{
-    return true;
-  }
-  return fun;
+
+		else {
+      rightR_leftR(t);
+    }
+	}
+
+	else if(height(t -> right) - height(t->left) > 1){
+    cout << "Tengo que balancear a " << t->key << endl;
+		if(height(t->right->right) >= height(t->right->left)){
+			right_rot(t);
+    }
+
+		else {
+      leftR_rightR(t);
+    }
+	}
+
+  cout << "No tuve que balancear a " << t->key << endl;
+	t -> bf= max(height(t -> left), height(t-> right)) + 1;
+
 }
 
 template <typename datatype>
-bool AVL<datatype>::balanced(){
-  return balanced(root);
+void AVL<datatype>::left_rot(AVLNode *  & t){
+	AVLNode * aux = t -> left;
+	t -> left = aux -> right;
+	aux -> right = t;
+
+  if(t->left!=nullptr)
+    t->left->parent = t;
+
+  aux->parent = t->parent;
+  t->parent = aux;
+
+  if(aux->parent!=nullptr){
+
+    if(aux->parent->left == t)
+      aux->parent->left = aux;
+
+    else
+      aux->parent->right = aux;
+  }
+
+	t -> bf= max(height(t -> left),height(t->right));
+	aux -> bf = max(height(aux -> left), t -> bf) + 1;
+	t = aux;
+}
+
+template <typename datatype>
+void AVL<datatype>::right_rot(AVLNode *  & t){
+	AVLNode * aux = t -> right;
+	t -> right = aux -> left;
+	aux -> left = t;
+
+  if(t->right != nullptr)
+    t->right->parent = t;
+
+  aux->parent = t->parent;
+  t->parent = aux;
+
+  if(aux->parent!=nullptr){
+
+    if(aux->parent->left == t)
+      aux->parent->left = aux;
+
+    else
+      aux->parent->right = aux;
+  }
+
+	t -> bf = max(height(t -> right),height(t->left));
+	aux -> bf = max(height(aux -> right), t -> bf) + 1;
+	t = aux;
+}
+
+template <typename datatype>
+void AVL<datatype>::leftR_rightR(AVLNode *  & t){
+	left_rot(t->right);
+	right_rot(t);
+}
+
+template <typename datatype>
+void AVL<datatype>::rightR_leftR(AVLNode *  & t){
+	right_rot(t -> left);
+	left_rot(t);
 }
